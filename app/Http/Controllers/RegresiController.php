@@ -6,6 +6,7 @@ use App\Models\LampData;
 use Illuminate\Http\Request;
 use App\Services\RegresiLinearService;
 use PDF;
+use Illuminate\Support\Facades\View;
 
 class RegresiController extends Controller
 {
@@ -63,5 +64,31 @@ class RegresiController extends Controller
         ->setPaper('a4', 'portrait');
 
     return $pdf->download('prediksi_lampu_operasi.pdf');
+}
+
+public function exportPDFWithChart(Request $request)
+{
+    $data = LampData::orderBy('minggu_ke', 'asc')->get();
+
+    if ($data->count() < 2) {
+        return redirect()->back()->with('error', 'Data tidak cukup untuk membuat prediksi.');
+    }
+
+    $x = $data->pluck('jam_pemakaian')->toArray();
+    $y = $data->pluck('lux')->toArray();
+
+    $regresi = \App\Services\RegresiLinearService::hitungRegresi($x, $y);
+    $a = $regresi['a'];
+    $b = $regresi['b'];
+    $lux_threshold = 40000;
+    $prediksi_jam = \App\Services\RegresiLinearService::prediksiJam($a, $b, $lux_threshold);
+    $prediksi_minggu = \App\Services\RegresiLinearService::prediksiMinggu($prediksi_jam);
+
+    $chartImage = $request->input('chart_image'); // base64
+
+    $pdf = PDF::loadView('export_pdf_with_chart', compact('data', 'a', 'b', 'prediksi_jam', 'prediksi_minggu', 'chartImage'))
+        ->setPaper('a4', 'portrait');
+
+    return $pdf->download('laporan_prediksi_lampu_dengan_grafik.pdf');
 }
 }

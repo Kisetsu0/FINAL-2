@@ -32,6 +32,7 @@ Route::get('/rekap-mingguan', [LampuMingguanController::class, 'rekapMingguan'])
 Route::get('/grafik', [RegresiController::class, 'index']);
 
 Route::get('/export-pdf', [RegresiController::class, 'exportPDF'])->name('export.pdf');
+Route::post('/export-pdf-chart', [RegresiController::class, 'exportPDFWithChart'])->name('export.pdf.withchart');
 
 Route::get('/riwayat', function () {
     $data = \App\Models\SensorData::orderBy('id', 'desc')->paginate(7); // tampilkan 10 per halaman
