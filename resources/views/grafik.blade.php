@@ -34,6 +34,10 @@
     @endif
 
     <a href="/data-sensor" class="btn btn-secondary mt-3">🔙 Kembali ke Data</a>
+    <a href="{{ route('export.pdf') }}" class="btn btn-danger mt-3" target="_blank">
+    🖨️ Ekspor PDF
+</a>
+
 </div>
 </body>
 </html>
